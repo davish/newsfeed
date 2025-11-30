@@ -11,6 +11,9 @@ importers:
       fast-xml-parser:
         specifier: ^5.3.2
         version: 5.3.2
+      feedsmith:
+        specifier: ^2.6.1
+        version: 2.6.1
       rss-parser:
         specifier: ^3.13.0
         version: 3.13.0
@@ -351,6 +354,10 @@ packages:
   entities@2.2.0:
     resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
 
+  entities@7.0.0:
+    resolution: {integrity: sha512-FDWG5cmEYf2Z00IkYRhbFrwIwvdFKH07uV8dvNy0omp/Qb1xcyCWp2UDtcwJF4QZZvk0sLudP6/hAu42TaqVhQ==}
+    engines: {node: '>=0.12'}
+
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
 
@@ -378,6 +385,9 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  feedsmith@2.6.1:
+    resolution: {integrity: sha512-HuHM1a7joFbRjMz77WSF8ureLogqllFTJZx2EuG6QyE72eKPcFgbk1f6TjJjmeNq5Q15dfjfqHuWCSiZLztY+A==}
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -753,6 +763,8 @@ snapshots:
 
   entities@2.2.0: {}
 
+  entities@7.0.0: {}
+
   es-module-lexer@1.7.0: {}
 
   esbuild@0.25.12:
@@ -797,6 +809,11 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
+
+  feedsmith@2.6.1:
+    dependencies:
+      entities: 7.0.0
+      fast-xml-parser: 5.3.2
 
   fsevents@2.3.3:
     optional: true
