@@ -1,6 +1,5 @@
-import RSSParser from "rss-parser";
-import { generateAtomFeed } from "feedsmith";
-import type { Atom } from "feedsmith/types";
+import { generateAtomFeed, parseFeed as parseFeedsmith } from "feedsmith";
+import type { Atom, Rss } from "feedsmith/types";
 
 export interface Feed {
   title: string;
@@ -21,40 +20,143 @@ export interface Post {
   feed: Feed;
 }
 
-function parseFeed(feed: RSSParser.Output<{}>, url: string): Feed {
-  // Create the Feed object first (with empty posts array temporarily)
+function convertFeedsmithToFeed(
+  parsed: Awaited<ReturnType<typeof parseFeedsmith>>,
+  feedUrl: string
+): Feed {
+  const feedsmith = parsed.feed;
+
   const result: Feed = {
-    title: feed.title || "",
+    title: feedsmith.title || "",
     posts: [],
-    url,
+    url: feedUrl,
   };
-  if (feed.description) result.description = feed.description;
-  if (feed.link) result.link = feed.link;
-  if ("lastBuildDate" in feed && feed.lastBuildDate) {
-    result.lastBuildDate = feed.lastBuildDate as string;
+
+  // Handle description/subtitle
+  if ("subtitle" in feedsmith && feedsmith.subtitle) {
+    result.description = feedsmith.subtitle;
+  } else if ("description" in feedsmith && feedsmith.description) {
+    result.description = feedsmith.description;
   }
 
-  // Now create posts with reference to the feed
-  const posts: Post[] = (feed.items || []).map((item) => {
-    const post: Post = {
-      title: item.title || "",
-      url: item.link || "",
-      feed: result,
-    };
-    if (item.content) post.content = item.content;
-    if (item.guid) post.guid = item.guid;
-    if (item.isoDate) {
-      const parsedDate = new Date(item.isoDate);
-      if (!isNaN(parsedDate.getTime())) {
-        post.date = parsedDate;
-      }
+  // Handle link
+  if ("links" in feedsmith && feedsmith.links && feedsmith.links.length > 0) {
+    const firstLink = feedsmith.links[0];
+    if (firstLink?.href !== undefined) {
+      result.link = firstLink.href;
     }
-    if (item.creator) post.creator = item.creator;
-    return post;
-  });
+  } else if ("link" in feedsmith && feedsmith.link) {
+    result.link = feedsmith.link;
+  }
 
-  // Assign posts to the feed
-  result.posts = posts;
+  // Handle lastBuildDate
+  if ("updated" in feedsmith && feedsmith.updated) {
+    const updated = feedsmith.updated;
+    result.lastBuildDate =
+      typeof updated === "string" ? updated : (updated as Date).toISOString();
+  } else if ("lastBuildDate" in feedsmith && feedsmith.lastBuildDate) {
+    const lastBuildDate = feedsmith.lastBuildDate;
+    result.lastBuildDate =
+      typeof lastBuildDate === "string"
+        ? lastBuildDate
+        : (lastBuildDate as Date).toISOString();
+  }
+
+  // Convert entries/items to posts
+  // Handle both Atom entries and RSS items
+  type EntryOrItem =
+    | Atom.Entry<string>
+    | Rss.Item<string>
+    | (Atom.Entry<string> & { links?: Array<Atom.Link<string>> });
+
+  const entries: EntryOrItem[] | undefined =
+    "entries" in feedsmith
+      ? (feedsmith.entries as EntryOrItem[])
+      : "items" in feedsmith
+      ? (feedsmith.items as EntryOrItem[])
+      : undefined;
+
+  if (entries) {
+    result.posts = entries.map((entry) => {
+      const post: Post = {
+        title: entry.title || "",
+        url: "",
+        feed: result,
+      };
+
+      // Extract URL from links (Atom) or link (RSS)
+      if (
+        "links" in entry &&
+        Array.isArray(entry.links) &&
+        entry.links.length > 0
+      ) {
+        const firstLink = entry.links[0];
+        if (firstLink && typeof firstLink === "object" && "href" in firstLink) {
+          const href = firstLink.href;
+          if (typeof href === "string") {
+            post.url = href;
+          }
+        }
+      } else if ("link" in entry && typeof entry.link === "string") {
+        post.url = entry.link;
+      }
+
+      // Add date - handle both Atom and RSS date fields
+      if ("updated" in entry && entry.updated) {
+        const updated = entry.updated;
+        post.date = typeof updated === "string" ? new Date(updated) : updated;
+      } else if ("published" in entry && entry.published) {
+        const published = entry.published;
+        post.date =
+          typeof published === "string" ? new Date(published) : published;
+      } else if ("pubDate" in entry && entry.pubDate) {
+        const pubDate = entry.pubDate;
+        post.date = typeof pubDate === "string" ? new Date(pubDate) : pubDate;
+      }
+
+      // Add content
+      if ("content" in entry && entry.content) {
+        post.content =
+          typeof entry.content === "string"
+            ? entry.content
+            : String(entry.content);
+      } else if ("description" in entry && entry.description) {
+        post.content =
+          typeof entry.description === "string"
+            ? entry.description
+            : String(entry.description);
+      }
+
+      // Add guid/id
+      if ("id" in entry && entry.id) {
+        post.guid = typeof entry.id === "string" ? entry.id : String(entry.id);
+      } else if ("guid" in entry && entry.guid) {
+        const guid = entry.guid;
+        post.guid = typeof guid === "string" ? guid : guid.value;
+      }
+
+      // Add creator/author
+      if ("authors" in entry && entry.authors && entry.authors.length > 0) {
+        const firstAuthor = entry.authors[0];
+        if (firstAuthor) {
+          if (typeof firstAuthor === "string") {
+            post.creator = firstAuthor;
+          } else if (
+            typeof firstAuthor === "object" &&
+            "name" in firstAuthor &&
+            typeof firstAuthor.name === "string"
+          ) {
+            post.creator = firstAuthor.name;
+          }
+        }
+      } else if ("creator" in entry && typeof entry.creator === "string") {
+        post.creator = entry.creator;
+      }
+
+      return post;
+    });
+  }
+
   return result;
 }
 
@@ -67,9 +169,8 @@ export async function parseRSSString(
   xmlContent: string,
   feedUrl: string
 ): Promise<Feed> {
-  const parser = new RSSParser();
-  const feed = await parser.parseString(xmlContent);
-  return parseFeed(feed, feedUrl);
+  const parsed = await parseFeedsmith(xmlContent);
+  return convertFeedsmithToFeed(parsed, feedUrl);
 }
 
 /**
@@ -78,9 +179,9 @@ export async function parseRSSString(
  * @returns Parsed RSS feed with all posts
  */
 export async function fetchRSSFeed(url: string): Promise<Feed> {
-  const parser = new RSSParser();
-  const feed = await parser.parseURL(url);
-  return parseFeed(feed, url);
+  const response = await fetch(url);
+  const xmlContent = await response.text();
+  return parseRSSString(xmlContent, url);
 }
 
 /**

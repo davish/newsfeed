@@ -21,7 +21,7 @@ describe("parseRSSString", () => {
             "url": "https://xkcd.com/3174/",
           },
           {
-            "content": "<img src="https://imgs.xkcd.com/comics/satellite_imagery.png" title="Every weekend I take an ATV out into the desert and spend a day tracing a faint &quot;(C) GOOGLE 2009&quot; watermark across the landscape." alt="Every weekend I take an ATV out into the desert and spend a day tracing a faint &quot;(C) GOOGLE 2009&quot; watermark across the landscape." />",
+            "content": "<img src="https://imgs.xkcd.com/comics/satellite_imagery.png" title="Every weekend I take an ATV out into the desert and spend a day tracing a faint "(C) GOOGLE 2009" watermark across the landscape." alt="Every weekend I take an ATV out into the desert and spend a day tracing a faint "(C) GOOGLE 2009" watermark across the landscape." />",
             "date": 2025-11-26T05:00:00.000Z,
             "feed": [Circular],
             "guid": "https://xkcd.com/3173/",
@@ -29,7 +29,7 @@ describe("parseRSSString", () => {
             "url": "https://xkcd.com/3173/",
           },
           {
-            "content": "<img src="https://imgs.xkcd.com/comics/fifteen_years.png" title="&quot;Want to feel old?&quot; &quot;Yes.&quot;" alt="&quot;Want to feel old?&quot; &quot;Yes.&quot;" />",
+            "content": "<img src="https://imgs.xkcd.com/comics/fifteen_years.png" title=""Want to feel old?" "Yes."" alt=""Want to feel old?" "Yes."" />",
             "date": 2025-11-24T05:00:00.000Z,
             "feed": [Circular],
             "guid": "https://xkcd.com/3172/",
@@ -63,24 +63,28 @@ describe("parseRSSString", () => {
           {
             "date": 2025-11-28T00:00:00.000Z,
             "feed": [Circular],
+            "guid": "https://xkcd.com/3174/",
             "title": "Bridge Clearance",
             "url": "https://xkcd.com/3174/",
           },
           {
             "date": 2025-11-26T00:00:00.000Z,
             "feed": [Circular],
+            "guid": "https://xkcd.com/3173/",
             "title": "Satellite Imagery",
             "url": "https://xkcd.com/3173/",
           },
           {
             "date": 2025-11-24T00:00:00.000Z,
             "feed": [Circular],
+            "guid": "https://xkcd.com/3172/",
             "title": "Fifteen Years",
             "url": "https://xkcd.com/3172/",
           },
           {
             "date": 2025-11-21T00:00:00.000Z,
             "feed": [Circular],
+            "guid": "https://xkcd.com/3171/",
             "title": "Geologic Core Sample",
             "url": "https://xkcd.com/3171/",
           },

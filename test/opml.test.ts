@@ -49,9 +49,7 @@ describe("parseOPML", () => {
     const result = parseOPML(xmlContent);
     expect(result).toMatchInlineSnapshot(`
       {
-        "dateCreated": undefined,
         "feeds": [],
-        "ownerEmail": undefined,
         "title": "Empty OPML",
       }
     `);
@@ -74,22 +72,18 @@ describe("parseOPML", () => {
     const result = parseOPML(xmlContent);
     expect(result).toMatchInlineSnapshot(`
       {
-        "dateCreated": undefined,
         "feeds": [
           {
-            "htmlUrl": undefined,
             "text": "RSS Feed",
             "title": "RSS Feed",
             "xmlUrl": "https://example.com/rss.xml",
           },
           {
-            "htmlUrl": undefined,
             "text": "Nested RSS",
             "title": "Nested RSS",
             "xmlUrl": "https://example.com/nested.xml",
           },
         ],
-        "ownerEmail": undefined,
         "title": "Mixed OPML",
       }
     `);
@@ -109,16 +103,13 @@ describe("parseOPML", () => {
     const result = parseOPML(xmlContent);
     expect(result).toMatchInlineSnapshot(`
       {
-        "dateCreated": undefined,
         "feeds": [
           {
-            "htmlUrl": undefined,
             "text": "Feed",
             "title": "Feed",
             "xmlUrl": "https://example.com/feed.xml",
           },
         ],
-        "ownerEmail": undefined,
         "title": "No HTML URL",
       }
     `);
@@ -138,16 +129,13 @@ describe("parseOPML", () => {
     const result = parseOPML(xmlContent);
     expect(result).toMatchInlineSnapshot(`
       {
-        "dateCreated": undefined,
         "feeds": [
           {
-            "htmlUrl": undefined,
             "text": "Feed Text",
             "title": "Feed Text",
             "xmlUrl": "https://example.com/feed.xml",
           },
         ],
-        "ownerEmail": undefined,
         "title": "Fallback Title",
       }
     `);
